@@ -4,6 +4,8 @@ Description: Receive and parse emails sent to SES email domain.
 Parameters:
   EmailAddress:
     Type: String
+  EmailBucketName:
+    Type: String
 
 Resources:
   ReceiveEmail:
@@ -17,7 +19,7 @@ Resources:
       - SNSPublishMessagePolicy:
           TopicName: !GetAtt ReceiveEmailTopic.TopicName
       - S3ReadPolicy:
-          BucketName: ses-email-replies
+          BucketName: !Ref EmailBucketName
       Environment:
         Variables:
           SNS_TOPIC_ARN: !Ref ReceiveEmailTopic
@@ -38,19 +40,19 @@ Resources:
   ReceiveEmailBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: ses-email-replies
+      BucketName: !Ref EmailBucketName
   
   ReceiveEmailBucketSESPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:  
       Bucket:  
-        Ref: "ReceiveEmailBucket"  
+        Ref: ReceiveEmailBucket 
       PolicyDocument:  
         Version: 2012-10-17
         Statement:  
         - Sid: ReceiveEmailBucketSESPolicy
           Action: s3:PutObject
           Effect: Allow
-          Resource: arn:aws:s3:::ses-email-replies/*
+          Resource: !Sub arn:aws:s3:::${EmailBucketName}/*
           Principal: 
             Service: ses.amazonaws.com 
