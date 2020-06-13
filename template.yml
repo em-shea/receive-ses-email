@@ -44,18 +44,11 @@ Resources:
       Bucket:  
         Ref: "ReceiveEmailBucket"  
       PolicyDocument:  
+        Version: 2012-10-17
         Statement:  
-        -  
-          Sid: "ReceiveEmailBucketSESPolicy"  
-          Action:  
-            - "s3:GetObject"  
-          Effect: "Allow"  
+        - Sid: ReceiveEmailBucketSESPolicy
+          Action: s3:GetObject
+          Effect: Allow
           Resource:  
-            Fn::Join:  
-              - ""  
-              -  
-                - "arn:aws:s3:::"  
-                -  
-                  Ref: "ReceiveEmailBucket"  
-                - "/*"  
-          Principal: "ses.amazonaws.com"  
+            Fn::Join: arn:aws:s3:::ses-email-replies/*
+          Principal: ses.amazonaws.com 
