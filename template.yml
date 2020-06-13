@@ -4,8 +4,6 @@ Description: Receive and parse emails sent to SES email domain.
 Parameters:
   EmailAddress:
     Type: String
-  ReceiveEmailBucket:
-    Type: String
 
 Resources:
   ReceiveEmail:
@@ -36,3 +34,8 @@ Resources:
       Subscription:
       - Protocol: email
         Endpoint: !Ref EmailAddress
+  
+  ReceiveEmailBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ses-email-replies

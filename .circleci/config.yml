@@ -17,4 +17,4 @@ jobs:
 
       - run: 
           name: Deploy with SAM
-          command: sam deploy --s3-bucket ses-email-app --stack-name receive-email --region us-east-1 --capabilities CAPABILITY_IAM --parameter-overrides ReceiveEmailBucket=ses-email-replies EmailAddress=$EMAIL_ADDRESS
+          command: sam deploy --s3-bucket ses-email-app --stack-name receive-email --region us-east-1 --capabilities CAPABILITY_IAM --parameter-overrides EmailAddress=$EMAIL_ADDRESS
