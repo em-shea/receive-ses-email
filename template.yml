@@ -50,4 +50,5 @@ Resources:
           Action: s3:GetObject
           Effect: Allow
           Resource: arn:aws:s3:::ses-email-replies/*
-          Principal: ses.amazonaws.com 
+          Principal: 
+            Service: ses.amazonaws.com 
