@@ -2,25 +2,26 @@ import os
 import json
 import boto3
 
-ses_client = boto3.client('ses')
+sns_client = boto3.client('sns')
 
 def lambda_handler(event, context):
 
-  print(event)
+  email_content = event['Records'][0]['ses']['mail']['commonHeaders']
 
+  print(email_content)
 
-#   try:
-#     publish_sns_update(text_message)
-#     print("Message send success.")
-#   except Exception as error:
-#     print(f"Message send failed, error: {error}")
+  try:
+    publish_sns_update(email_content)
+    print("Message send success.")
+  except Exception as error:
+    print(f"Message send failed, error: {error}")
 
-# def publish_sns_update(text_message):
+def publish_sns_update(email_content):
 
-#   response = sns_client.publish(
-#       TargetArn = os.environ['SNS_TOPIC_ARN'], 
-#       Message=json.dumps({'default': text_message}),
-#       MessageStructure='json'
-#   )
+  response = sns_client.publish(
+      TargetArn = os.environ['SNS_TOPIC_ARN'], 
+      Message=json.dumps({'default': email_content}),
+      MessageStructure='json'
+  )
 
-#   return response
+  return response

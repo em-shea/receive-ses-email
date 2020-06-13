@@ -13,6 +13,16 @@ Resources:
       Handler: receive_email.lambda_handler
       Runtime: python3.7
       Timeout: 120
+      Policies:
+      - SNSPublishMessagePolicy:
+          TopicName: !GetAtt ReceiveEmailSNSTopic.TopicName
       Environment:
         Variables:
-          EMAIL_ADDRESS: !Ref EmailAddress
+          SNS_TOPIC: !Ref ReceiveEmailTopic
+
+  ReceiveEmailTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+      - Protocol: email
+        Endpoint: !Ref EmailAddress
