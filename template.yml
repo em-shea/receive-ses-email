@@ -21,7 +21,7 @@ Resources:
       Environment:
         Variables:
           SNS_TOPIC_ARN: !Ref ReceiveEmailTopic
-          S3_BUCKET_NAME: !Ref ReceiveEmailBucket
+          # S3_BUCKET_NAME: !Ref ReceiveEmailBucket
       Events:
         ReceiveEmailEvent:
           Type: S3
