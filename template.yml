@@ -47,7 +47,7 @@ Resources:
         Version: 2012-10-17
         Statement:  
         - Sid: ReceiveEmailBucketSESPolicy
-          Action: s3:GetObject
+          Action: s3:PutObject
           Effect: Allow
           Resource: arn:aws:s3:::ses-email-replies/*
           Principal: 
