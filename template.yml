@@ -40,14 +40,22 @@ Resources:
   
   ReceiveEmailBucketSESPolicy:
     Type: AWS::S3::BucketPolicy
-    Properties: 
-      Bucket: !Ref ReceiveEmailBucket
-      PolicyDocument:
-        Statement: 
-          - Sid: ReceiveEmailBucketSESPolicy
-            Action: s3:GetObject
-            Effect: Allow
-            Resource: !Ref ReceiveEmailBucket
-            Principal:
-              Service: 
-              - ses.amazonaws.com
+    Properties:  
+      Bucket:  
+        Ref: "ReceiveEmailBucket"  
+      PolicyDocument:  
+        Statement:  
+        -  
+          Sid: "ReceiveEmailBucketSESPolicy"  
+          Action:  
+            - "s3:GetObject"  
+          Effect: "Allow"  
+          Resource:  
+            Fn::Join:  
+              - ""  
+              -  
+                - "arn:aws:s3:::"  
+                -  
+                  Ref: "ReceiveEmailBucket"  
+                - "/*"  
+          Principal: "ses.amazonaws.com"  
