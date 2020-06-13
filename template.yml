@@ -49,6 +49,5 @@ Resources:
         - Sid: ReceiveEmailBucketSESPolicy
           Action: s3:GetObject
           Effect: Allow
-          Resource:  
-            Fn::Join: arn:aws:s3:::ses-email-replies/*
+          Resource: arn:aws:s3:::ses-email-replies/*
           Principal: ses.amazonaws.com 
