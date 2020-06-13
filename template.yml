@@ -18,7 +18,7 @@ Resources:
       Policies:
       - SNSPublishMessagePolicy:
           TopicName: !GetAtt ReceiveEmailTopic.TopicName
-      - S3ReadPolicy
+      - S3ReadPolicy:
           BucketName: !Ref ReceiveEmailBucket
       Environment:
         Variables:
