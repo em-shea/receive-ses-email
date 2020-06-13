@@ -1,0 +1,20 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install awscli
+          command: sudo pip install awscli
+      
+      - run:
+          name: Install SAM
+          command: sudo pip install aws-sam-cli
+
+      - run: 
+          name: Deploy with SAM
+          command: sam deploy --s3-bucket ses-email-replies --stack-name receive-email --region us-east-1 --capabilities CAPABILITY_IAM --parameter-overrides EmailAddress=$EMAIL_ADDRESS

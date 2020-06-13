@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Receive and parse emails sent to SES email domain.
+Parameters:
+  EmailAddress:
+    Type: String
+
+Resources:
+  ReceiveEmail:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: ReceiveEmail
+      Handler: receive_email.lambda_handler
+      Runtime: python3.7
+      Timeout: 120
+      Environment:
+        Variables:
+          EMAIL_ADDRESS: !Ref EmailAddress
