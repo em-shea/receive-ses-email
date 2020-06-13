@@ -18,7 +18,7 @@ Resources:
           TopicName: !GetAtt ReceiveEmailTopic.TopicName
       Environment:
         Variables:
-          SNS_TOPIC: !Ref ReceiveEmailTopic
+          SNS_TOPIC_ARN: !Ref ReceiveEmailTopic
 
   ReceiveEmailTopic:
     Type: AWS::SNS::Topic
