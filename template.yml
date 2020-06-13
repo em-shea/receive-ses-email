@@ -44,8 +44,10 @@ Resources:
       Bucket: !Ref ReceiveEmailBucket
       PolicyDocument:
         Statement: 
-          - Action: s3:GetObject
+          - Sid: ReceiveEmailBucketSESPolicy
+            Action: s3:GetObject
             Effect: Allow
             Resource: !Ref ReceiveEmailBucket
             Principal:
-              Service: ses.amazonaws.com
+              Service: 
+              - ses.amazonaws.com
