@@ -37,3 +37,15 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: ses-email-replies
+  
+  ReceiveEmailBucketSESPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref ReceiveEmailBucket
+      PolicyDocument:
+        Statement: 
+          - Action: s3:GetObject
+            Effect: Allow
+            Resource: !Ref ReceiveEmailBucket
+            Principal:
+              Service: ses.amazonaws.com
