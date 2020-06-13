@@ -15,7 +15,7 @@ Resources:
       Timeout: 120
       Policies:
       - SNSPublishMessagePolicy:
-          TopicName: !GetAtt ReceiveEmailSNSTopic.TopicName
+          TopicName: !GetAtt ReceiveEmailTopic.TopicName
       Environment:
         Variables:
           SNS_TOPIC: !Ref ReceiveEmailTopic
