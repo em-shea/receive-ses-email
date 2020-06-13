@@ -16,12 +16,11 @@ Resources:
       Policies:
       - SNSPublishMessagePolicy:
           TopicName: !GetAtt ReceiveEmailTopic.TopicName
-      # - S3ReadPolicy:
-      #     BucketName: !Ref ReceiveEmailBucket
+      - S3ReadPolicy:
+          BucketName: !Ref ReceiveEmailBucket
       Environment:
         Variables:
           SNS_TOPIC_ARN: !Ref ReceiveEmailTopic
-          # S3_BUCKET_NAME: !Ref ReceiveEmailBucket
       Events:
         ReceiveEmailEvent:
           Type: S3

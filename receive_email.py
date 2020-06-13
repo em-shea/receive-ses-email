@@ -2,18 +2,18 @@ import os
 import json
 import boto3
 
-s3_client = boto3.client('s3')
+s3 = boto3.resource('s3')
 sns_client = boto3.client('sns')
 
 def lambda_handler(event, context):
 
   print(event)
 
-  object_key = event[0]['s3']['object']['key']
+  bucket_key = event['Records'][0]['s3']['object']['key']
 
-  bucket_name = os.environ['S3_BUCKET_NAME']
+  bucket_name = event['Records'][0]['s3']['bucket']['name']
 
-  obj = s3_client.Object(bucket_name, object_key)
+  obj = s3.Object(bucket_name, bucket_key)
   email_string = obj.get()['Body'].read().decode('utf-8') 
 
   print(email_string)
