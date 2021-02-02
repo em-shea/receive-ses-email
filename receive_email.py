@@ -16,7 +16,9 @@ def lambda_handler(event, context):
   obj = s3.Object(bucket_name, bucket_key)
   email_string = obj.get()['Body'].read().decode('utf-8') 
 
-  print('email_string: ', email_string)
+  print('type: ', type(email_string))
+
+  # print('email_string: ', email_string)
 
   # email_content = event['Records'][0]['ses']['mail']['commonHeaders']
 

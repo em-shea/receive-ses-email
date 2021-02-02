@@ -8,6 +8,8 @@ Parameters:
     Type: String
 
 Resources:
+  # Lambda function that is triggered when a new file is created in an S3 bucket
+  # Function parses the file contents and send the content using SNS (eventually SES)
   ReceiveEmail:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -30,6 +32,7 @@ Resources:
             Bucket: !Ref ReceiveEmailBucket
             Events: s3:ObjectCreated:*
 
+  # SNS topic where notifications are published and the parsed email content is sent
   ReceiveEmailTopic:
     Type: AWS::SNS::Topic
     Properties:
@@ -37,11 +40,13 @@ Resources:
       - Protocol: email
         Endpoint: !Ref EmailAddress
   
+  # Bucket where files are created whenever a new email message is sent to the domain name
   ReceiveEmailBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref EmailBucketName
   
+  # S3 policy that enables SES to put incoming emails into the bucket as files
   ReceiveEmailBucketSESPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:  
