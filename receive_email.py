@@ -4,6 +4,7 @@ import boto3
 
 s3 = boto3.resource('s3')
 sns_client = boto3.client('sns')
+ses_client = boto3.client('ses')
 
 def lambda_handler(event, context):
 
@@ -37,7 +38,7 @@ def parse_email_obj(obj_content_string):
     content_type = "delivery error (bot)"
     initial_string = obj_content_string.split("envelope-from=",1)[1]
     notification_message = initial_string.split(";")[0].strip()
-  elif:
+  elif "MIME-Version: 1.0" in obj_content_string:
     content_type = "inbound message"
     notification_message = obj_content_string.split("MIME-Version: 1.0")[1]
   else:
@@ -49,8 +50,7 @@ def parse_email_obj(obj_content_string):
 
   return content_type, notification_message
 
-# Send SES email
-def send_email(content_type, notification_message, link_to_file):
+def send_notification_email(content_type, notification_message, link_to_file):
 
     response = ses_client.send_email(
         Source = "Email received notification <email_received@" + os.environ['EMAIL_DOMAIN'] + ">",
@@ -67,24 +67,10 @@ def send_email(content_type, notification_message, link_to_file):
             "Body": {
                 "Html": {
                     "Charset": "UTF-8",
-                    "Data": notification_message + link_to_file
+                    "Data": notification_message + "\n" + link_to_file
                 }
             }
         }
     )
 
     return response
-
-# def publish_sns_update(email_content):
-
-#   content_string = json.dumps(email_content)
-
-#   email_body = ""
-
-#   response = sns_client.publish(
-#       TargetArn = os.environ['SNS_TOPIC_ARN'], 
-#       Message=json.dumps({'default': content_string}),
-#       MessageStructure='json'
-#   )
-
-#   return response

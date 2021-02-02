@@ -1,17 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: Receive and parse emails sent to SES email domain.
+Description: Receive messages sent to an SES domain and sends a notification message with the email contents to a given email address.
+# For this application to work, an SES rule set must first be created to save inbound email message files to an S3 bucket.
+# How-to: https://aws.amazon.com/premiumsupport/knowledge-center/ses-receive-inbound-emails/
 Parameters:
+  # Email address that will receive notifications whenever a new message is received.
   EmailAddress:
     Type: String
+  # SES verified domain that will send the notification emails
   EmailDomain:
     Type: String
+  # S3 bucket where received email messages will be stored, triggering this workflow
   EmailBucketName:
     Type: String
 
 Resources:
   # Lambda function that is triggered when a new file is created in an S3 bucket
-  # Function parses the file contents and send the content using SNS (eventually SES)
+  # Function parses the file contents and send the content using SES
   ReceiveEmail:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -22,13 +27,10 @@ Resources:
       Policies:
       - SESCrudPolicy:
           IdentityName: !Ref EmailDomain
-      # - SNSPublishMessagePolicy:
-      #     TopicName: !GetAtt ReceiveEmailTopic.TopicName
       - S3ReadPolicy:
           BucketName: !Ref EmailBucketName
       Environment:
         Variables:
-          # SNS_TOPIC_ARN: !Ref ReceiveEmailTopic
           EMAIL_ADDRESS: !Ref EmailAddress
           EMAIL_DOMAIN: !Ref EmailDomain
       Events:
@@ -37,14 +39,6 @@ Resources:
           Properties:
             Bucket: !Ref ReceiveEmailBucket
             Events: s3:ObjectCreated:*
-
-  # SNS topic where notifications are published and the parsed email content is sent
-  # ReceiveEmailTopic:
-  #   Type: AWS::SNS::Topic
-  #   Properties:
-  #     Subscription:
-  #     - Protocol: email
-  #       Endpoint: !Ref EmailAddress
   
   # Bucket where files are created whenever a new email message is sent to the domain name
   ReceiveEmailBucket:
