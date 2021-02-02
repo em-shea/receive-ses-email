@@ -16,9 +16,10 @@ def lambda_handler(event, context):
   obj = s3.Object(bucket_name, bucket_key)
   obj_content_string = obj.get()['Body'].read().decode('utf-8')
 
-  content_type = parse_email_obj(obj_content_string)
+  content_type, notification_message = parse_email_obj(obj_content_string)
 
   print('content_type: ', content_type)
+  print('notif: ', notification_message)
 
   # print('type: ', type(obj_content_string))
 
@@ -37,15 +38,21 @@ def lambda_handler(event, context):
 def parse_email_obj(obj_content_string):
   
   content_type = "none"
+  notification_message = "empty"
 
   if "Delivery Status Notification (Failure)" in obj_content_string:
     content_type = "delivery failure (bad email)"
-    elif "Delivery error report" in obj_content_string:
-      content_type = "delivery error (bot)"
-      else:
-        content_type = "inbound message"
+    initial_string = obj_content_string.split("An error occurred while trying to deliver the mail to the following recipients:")[1
+    notification_message = initial_string.split("------=_Part_")[0]
+  elif "Delivery error report" in obj_content_string:
+    content_type = "delivery error (bot)"
+  else:
+    content_type = "inbound message"
+  
+  print('content_type: ', content_type)
+  print('notif: ', notification_message)
 
-  return content_type
+  return content_type, notification_message
 
 def publish_sns_update(email_content):
 
