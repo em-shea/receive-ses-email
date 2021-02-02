@@ -4,6 +4,8 @@ Description: Receive and parse emails sent to SES email domain.
 Parameters:
   EmailAddress:
     Type: String
+  EmailDomain:
+    Type: String
   EmailBucketName:
     Type: String
 
@@ -18,13 +20,17 @@ Resources:
       Runtime: python3.7
       Timeout: 120
       Policies:
-      - SNSPublishMessagePolicy:
-          TopicName: !GetAtt ReceiveEmailTopic.TopicName
+      - SESCrudPolicy:
+          IdentityName: !Ref EmailDomain
+      # - SNSPublishMessagePolicy:
+      #     TopicName: !GetAtt ReceiveEmailTopic.TopicName
       - S3ReadPolicy:
           BucketName: !Ref EmailBucketName
       Environment:
         Variables:
-          SNS_TOPIC_ARN: !Ref ReceiveEmailTopic
+          # SNS_TOPIC_ARN: !Ref ReceiveEmailTopic
+          EMAIL_ADDRESS: !Ref EmailAddress
+          EMAIL_DOMAIN: !Ref EmailDomain
       Events:
         ReceiveEmailEvent:
           Type: S3
@@ -33,12 +39,12 @@ Resources:
             Events: s3:ObjectCreated:*
 
   # SNS topic where notifications are published and the parsed email content is sent
-  ReceiveEmailTopic:
-    Type: AWS::SNS::Topic
-    Properties:
-      Subscription:
-      - Protocol: email
-        Endpoint: !Ref EmailAddress
+  # ReceiveEmailTopic:
+  #   Type: AWS::SNS::Topic
+  #   Properties:
+  #     Subscription:
+  #     - Protocol: email
+  #       Endpoint: !Ref EmailAddress
   
   # Bucket where files are created whenever a new email message is sent to the domain name
   ReceiveEmailBucket:
