@@ -7,7 +7,7 @@ sns_client = boto3.client('sns')
 
 def lambda_handler(event, context):
 
-  print(event)
+  print('event: ', event)
 
   bucket_key = event['Records'][0]['s3']['object']['key']
 
@@ -16,7 +16,7 @@ def lambda_handler(event, context):
   obj = s3.Object(bucket_name, bucket_key)
   email_string = obj.get()['Body'].read().decode('utf-8') 
 
-  print(email_string)
+  print('email_string: ', email_string)
 
   # email_content = event['Records'][0]['ses']['mail']['commonHeaders']
 
