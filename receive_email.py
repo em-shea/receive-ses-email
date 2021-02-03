@@ -19,8 +19,10 @@ def lambda_handler(event, context):
 
   link_to_file = "https://s3.console.aws.amazon.com/s3/object/" + bucket_name + "?region=" + bucket_region + "&prefix=" + bucket_key
 
+  notification_email_content = get_notification_template(content_type, notification_message, link_to_file)
+
   try:
-    send_notification_email(content_type, notification_message, link_to_file)
+    send_notification_email(content_type, notification_email_content)
     print("Message send success.")
   except Exception as error:
     print(f"Message send failed, error: {error}")
@@ -37,7 +39,7 @@ def parse_email_obj(obj_content_string):
   elif "Delivery error report" in obj_content_string:
     content_type = "delivery error (bot)"
     initial_string = obj_content_string.split("envelope-from=",1)[1]
-    notification_message = initial_string.split(";")[0].strip()
+    notification_message = initial_string.split(";")[0].strip()[0:5]
   elif "MIME-Version: 1.0" in obj_content_string:
     content_type = "inbound message"
     notification_message = obj_content_string.split("MIME-Version: 1.0")[1]
@@ -50,10 +52,23 @@ def parse_email_obj(obj_content_string):
 
   return content_type, notification_message
 
-def send_notification_email(content_type, notification_message, link_to_file):
+def get_notification_template(content_type, notification_message, link_to_file):
+
+  # To run unit tests for this function, we need to specify an absolute file path
+  abs_dir = os.path.dirname(os.path.abspath(__file__))
+  with open(os.path.join(abs_dir, 'notification_email_template.html')) as fh:
+      contents = fh.read()
+
+  notification_email_contents = contents.replace("{content_type}", content_type)
+  notification_email_contents = contents.replace("{notification_message}", notification_message)
+  notification_email_contents = contents.replace("{link_to_file}", link_to_file)
+
+  return notification_email_contents
+
+def send_notification_email(content_type, notification_email_content):
 
     response = ses_client.send_email(
-        Source = "Email received notification <email_received@" + os.environ['EMAIL_DOMAIN'] + ">",
+        Source = "Email received notification <emailreceived@" + os.environ['EMAIL_DOMAIN'] + ">",
         Destination = {
             "ToAddresses" : [
             os.environ['EMAIL_ADDRESS']
@@ -67,7 +82,7 @@ def send_notification_email(content_type, notification_message, link_to_file):
             "Body": {
                 "Html": {
                     "Charset": "UTF-8",
-                    "Data": notification_message + "\n" + link_to_file
+                    "Data": notification_email_content
                 }
             }
         }
