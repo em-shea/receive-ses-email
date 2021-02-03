@@ -60,8 +60,8 @@ def get_notification_template(content_type, notification_message, link_to_file):
       contents = fh.read()
 
   notification_email_contents = contents.replace("{content_type}", content_type)
-  notification_email_contents = contents.replace("{notification_message}", notification_message)
-  notification_email_contents = contents.replace("{link_to_file}", link_to_file)
+  notification_email_contents = notification_email_contents.replace("{notification_message}", notification_message)
+  notification_email_contents = notification_email_contents.replace("{link_to_file}", link_to_file)
 
   return notification_email_contents
 
