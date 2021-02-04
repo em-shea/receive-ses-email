@@ -21,7 +21,8 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       FunctionName: ReceiveEmail
-      Handler: receive_email.lambda_handler
+      Handler: app.lambda_handler
+      CodeUri: src/parse_email_and_notify
       Runtime: python3.7
       Timeout: 120
       Policies:
