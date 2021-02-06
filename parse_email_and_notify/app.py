@@ -45,7 +45,7 @@ def parse_email_obj(obj_content_string):
   elif "Delivery error report" in obj_content_string:
     content_type = "delivery error (bot)"
     initial_string = obj_content_string.split("envelope-from=",1)[1]
-    notification_message = initial_string.split(";")[0].strip()[0:5]
+    notification_message = initial_string.split(";")[0].strip()
   elif "MIME-Version: 1.0" in obj_content_string:
     content_type = "inbound message"
     notification_message = obj_content_string.split("MIME-Version: 1.0")[1]
