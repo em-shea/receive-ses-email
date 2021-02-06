@@ -2,7 +2,7 @@
 
 **This is a serverless app that receives and parses inbound emails sent to your Amazon Simple Email Service (SES) domain. It then sends a notification message to your personal email with details about the email contents.**
 
-For some background on this app for, I wanted to find a way to handle inbound emails being sent to an SES domain for a project of mine, [Haohaotiantian](haohaotiantian.com). Haohaotiantian sends out daily emails to its subscribers from an SES email. I often receive bounce backs when people sign up to the service with a misspelled or otherwise invalid email.
+For some background on this app, I wanted to find a way to handle inbound emails being sent to an SES domain for a project of mine, [Haohaotiantian](haohaotiantian.com). Haohaotiantian sends out daily emails to its subscribers from an SES email. I often receive bounce backs when people sign up to the service with a misspelled or otherwise invalid email.
 
 When I searched for how to handle inbound emails, all of the tutorials that I could find were just for the first step - automatically storing inbound emails in S3. I set up an SNS notification to let me know when a new email was saved in S3, but I still needed to go to S3 and download the object to see what was in the email. This app automates the second step, providing you with at least a preview of what type of email message you have received.
 
