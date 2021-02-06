@@ -1,10 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 Description: Receive messages sent to an SES domain and sends a notification message with the email contents to a given email address.
-# For this application to work, an SES rule set must first be created to save inbound email message files to an S3 bucket.
+# Once you've deployed this CloudFormation stack, set up an SES rule to save inbound email messages to the S3 bucket that was created
 # How-to: https://aws.amazon.com/premiumsupport/knowledge-center/ses-receive-inbound-emails/
 Parameters:
-  # Email address that will receive notifications whenever a new message is received.
+  # Personal email address that will receive notifications whenever a new message is received
   EmailAddress:
     Type: String
   # SES verified domain that will send the notification emails
@@ -61,4 +61,4 @@ Resources:
           Effect: Allow
           Resource: !Sub arn:aws:s3:::${EmailBucketName}/*
           Principal: 
-            Service: ses.amazonaws.com 
+            Service: ses.amazonaws.com
