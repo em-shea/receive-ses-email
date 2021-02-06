@@ -12,8 +12,7 @@ def lambda_handler(event, context):
   bucket_name = event['Records'][0]['s3']['bucket']['name']
   bucket_region = event['Records'][0]['awsRegion']
 
-  obj = s3.Object(bucket_name, bucket_key)
-  obj_content_string = obj.get()['Body'].read().decode('utf-8')
+  obj_content_string = get_file(bucket_key, bucket_name, bucket_region)
 
   content_type, notification_message = parse_email_obj(obj_content_string)
 
@@ -23,9 +22,16 @@ def lambda_handler(event, context):
 
   try:
     send_notification_email(content_type, notification_email_content)
-    print("Message send success.")
+    return "Message send success."
   except Exception as error:
-    print(f"Message send failed, error: {error}")
+    return f"Message send failed, error: {error}"
+
+def get_file(bucket_key, bucket_name, bucket_region):
+
+  obj = s3.Object(bucket_name, bucket_key)
+  obj_content_string = obj.get()['Body'].read().decode('utf-8')
+
+  return obj_content_string
 
 def parse_email_obj(obj_content_string):
   
@@ -46,9 +52,6 @@ def parse_email_obj(obj_content_string):
   else:
     content_type = "uncategorized email type"
     notification_message = "See S3 file link for message details."
-  
-  print('content_type: ', content_type)
-  print('notif: ', notification_message)
 
   return content_type, notification_message
 
