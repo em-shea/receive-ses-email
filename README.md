@@ -25,7 +25,7 @@ If you're new to deploying serverless applications using a deployment pipeline, 
 
 #### Example notification email
 
-![Example notification email](https://emshea-static.s3.amazonaws.com/example-notification.png)
+![Example notification email](https://emshea-static.s3.amazonaws.com/notification.png)
 
 ### Email types
 
