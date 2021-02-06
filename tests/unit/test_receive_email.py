@@ -9,7 +9,7 @@ from unittest import mock
 with mock.patch.dict('os.environ', {'AWS_REGION': 'us-east-1', 'EMAIL_DOMAIN': 'mock-domain', 'EMAIL_ADDRESS': 'mock-address'}):
   from parse_email_and_notify.app import lambda_handler
 
-def mocked_get_file_from_s3_delivery_failure():
+def mocked_get_file_from_s3_delivery_failure(bucket_key, bucket_name, bucket_region):
   return """
             Return-Path: <>
             Received: from a14-86.smtp-out.amazonses.com (a14-86.smtp-out.amazonses.com [54.240.14.86])
@@ -97,7 +97,7 @@ def mocked_get_file_from_s3_delivery_failure():
             ------=_Part_5909269_2113273023.1610884342420--
           """
 
-def mocked_get_file_from_s3_delivery_error():
+def mocked_get_file_from_s3_delivery_error(bucket_key, bucket_name, bucket_region):
   return """
             Return-Path: <>
             Received: from m12-53.163.com (163.mxmail.netease.com [220.181.12.53])
@@ -309,7 +309,7 @@ def mocked_get_file_from_s3_delivery_error():
 
           """
 
-def mocked_get_file_from_s3_inbound_message():
+def mocked_get_file_from_s3_inbound_message(bucket_key, bucket_name, bucket_region):
   return """
             Return-Path: <inboundemail@gmail.com>
             Received: from mail-il1-f173.google.com (mail-il1-f173.google.com [209.85.166.173])
@@ -373,74 +373,71 @@ def mocked_get_file_from_s3_inbound_message():
             --0000000000003d6a7805ba60473f--
           """
 
-def mocked_get_file_from_s3_uncategorized():
+def mocked_get_file_from_s3_uncategorized(bucket_key, bucket_name, bucket_region):
   return "Just a string, cannot be categorized."
 
-def mocked_send_email_through_ses():
-  return
+def mocked_send_email_through_ses(content_type, notification_email_content):
+  return 
+
+def mocked_send_email_through_ses_error(content_type, notification_email_content):
+  raise Exception('ses email failed to send')
 
 class ParseEmailTest(unittest.TestCase):
 
-  # parse_email_obj(obj_content_string)
-  # - download from s3
-  # get_notification_template(content_type, notification_message, link_to_file)
-  # - get template html file
-  # send_notification_email(content_type, notification_email_content)
-  # - send through ses
-
-  @mock.patch('parse_email_and_notify.app.parse_email_obj', side_effect=mocked_get_file_from_s3_delivery_failure)
   @mock.patch('parse_email_and_notify.app.send_notification_email', side_effect=mocked_send_email_through_ses)
+  @mock.patch('parse_email_and_notify.app.get_file', side_effect=mocked_get_file_from_s3_delivery_failure)
   def test_delivery_failure(self, s3_get_file_mock, send_email_ses_mock):
 
-    # event_type = "delivery failure (bad email)"
-    # event = self.get_sns_event(event_type)
     response = lambda_handler(self.get_sns_event(), "")
 
     self.assertEqual(s3_get_file_mock.call_count, 1)
     self.assertEqual(send_email_ses_mock.call_count, 1)
+    self.assertEqual('delivery failure (bad email)', send_email_ses_mock.call_args[0][0])
+    self.assertEqual('Message send success.', response)
 
-  @mock.patch('parse_email_and_notify.app.parse_email_obj', side_effect=mocked_get_file_from_s3_delivery_error)
   @mock.patch('parse_email_and_notify.app.send_notification_email', side_effect=mocked_send_email_through_ses)
+  @mock.patch('parse_email_and_notify.app.get_file', side_effect=mocked_get_file_from_s3_delivery_error)
   def test_delivery_error(self, s3_get_file_mock, send_email_ses_mock):
 
-    # event_type = "delivery error (bot)"
-    # event = self.get_sns_event(event_type)
     response = lambda_handler(self.get_sns_event(), "")
 
     self.assertEqual(s3_get_file_mock.call_count, 1)
     self.assertEqual(send_email_ses_mock.call_count, 1)
+    self.assertEqual('delivery error (bot)', send_email_ses_mock.call_args[0][0])
+    self.assertEqual('Message send success.', response)
   
-  @mock.patch('parse_email_and_notify.app.parse_email_obj', side_effect=mocked_get_file_from_s3_inbound_message)
   @mock.patch('parse_email_and_notify.app.send_notification_email', side_effect=mocked_send_email_through_ses)
+  @mock.patch('parse_email_and_notify.app.get_file', side_effect=mocked_get_file_from_s3_inbound_message)
   def test_inbound_message(self, s3_get_file_mock, send_email_ses_mock):
 
-    # event_type = "inbound message"
-    # event = self.get_sns_event(event_type)
     response = lambda_handler(self.get_sns_event(), "")
 
     self.assertEqual(s3_get_file_mock.call_count, 1)
     self.assertEqual(send_email_ses_mock.call_count, 1)
+    self.assertEqual('inbound message', send_email_ses_mock.call_args[0][0])
+    self.assertEqual('Message send success.', response)
 
-  @mock.patch('parse_email_and_notify.app.parse_email_obj', side_effect=mocked_get_file_from_s3_uncategorized)
   @mock.patch('parse_email_and_notify.app.send_notification_email', side_effect=mocked_send_email_through_ses)
+  @mock.patch('parse_email_and_notify.app.get_file', side_effect=mocked_get_file_from_s3_uncategorized)
   def test_uncategorized_type(self, s3_get_file_mock, send_email_ses_mock):
 
-    # event_type = "uncategorized email type"
-    # event = self.get_sns_event(event_type)
     response = lambda_handler(self.get_sns_event(), "")
 
     self.assertEqual(s3_get_file_mock.call_count, 1)
     self.assertEqual(send_email_ses_mock.call_count, 1)
+    self.assertEqual('uncategorized email type', send_email_ses_mock.call_args[0][0])
+    self.assertEqual('Message send success.', response)
 
-    # self.assertEqual(s3_get_file_mock.call_count, 1)
-    # self.assertEqual(response['accepted_file_type'], True)
-    # self.assertIn('attachment_data', response)
-    # self.assertEqual(response['attachment_data']['ticket_id'], event['detail']['ticket_event']['ticket']['id'])
-    # self.assertEqual(response['attachment_data']['attachment_id'], event['detail']['ticket_event']['attachment']['id'])
-    # self.assertEqual(response['attachment_data']['content_type'], event['detail']['ticket_event']['attachment']['content_type'])
-    # self.assertEqual(response['attachment_data']['url'], event['detail']['ticket_event']['attachment']['content_url'])
-    # self.assertEqual(response['attachment_data']['file_name'], event['detail']['ticket_event']['attachment']['filename'])
-    # self.assertIn('bucket_key', response['attachment_data'])
+  @mock.patch('parse_email_and_notify.app.send_notification_email', side_effect=mocked_send_email_through_ses_error)
+  @mock.patch('parse_email_and_notify.app.get_file', side_effect=mocked_get_file_from_s3_delivery_failure)
+  def test_ses_send_error(self, s3_get_file_mock, send_email_ses_error_mock):
+
+    response = lambda_handler(self.get_sns_event(), "")
+
+    self.assertEqual(s3_get_file_mock.call_count, 1)
+    self.assertEqual(send_email_ses_error_mock.call_count, 1)
+    self.assertEqual('delivery failure (bad email)', send_email_ses_error_mock.call_args[0][0])
+    self.assertEqual('Message send failed, error: ses email failed to send', response)
 
   def get_sns_event(self):
     return {
