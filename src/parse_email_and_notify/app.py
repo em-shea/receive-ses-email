@@ -42,15 +42,14 @@ def parse_email_obj(obj_content_string):
   if "Delivery Status Notification (Failure)" in obj_content_string:
     content_type = "delivery failure (bad email)"
     initial_string = obj_content_string.split("An error occurred while trying to deliver the mail to the following recipients:",1)[1]
-    notification_message = initial_string.split("------=_Part_")[0].strip()
+    notification_message = f"Delivery error sending to: {initial_string.split('------=_Part_')[0].strip()}"
   elif "Delivery error report" in obj_content_string:
     content_type = "delivery error (bot)"
     initial_string = obj_content_string.split("envelope-from=",1)[1]
-    notification_message = initial_string.split(";")[0].strip()
+    notification_message = f"Sender: {initial_string.split(';')[0].strip()}"
   elif "MIME-Version: 1.0" in obj_content_string:
     content_type = "inbound message"
     notification_message = get_email_contents(obj_content_string)
-    # notification_message = obj_content_string.split("MIME-Version: 1.0")[1]
   else:
     content_type = "uncategorized email type"
     notification_message = "See S3 file link for message details."
@@ -62,10 +61,10 @@ def get_email_contents(obj_content_string):
   message = email.message_from_string(obj_content_string)
 
   email_payload = [
-    f"To: {message['to']}",
-    f"From: {message['from']}",
-    f"Subject: {message['subject']}",
-    "Body: ",
+    f"<p>To: {message['to']}</p>",
+    f"<p>From: {message['from']}</p>",
+    f"<p>Subject: {message['subject']}</p>",
+    "<p>Body: </p>",
   ]
 
   if message.is_multipart():
