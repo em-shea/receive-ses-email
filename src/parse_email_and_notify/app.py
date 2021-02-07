@@ -1,6 +1,7 @@
 import os
 import json
 import boto3
+import email
 
 s3 = boto3.resource('s3')
 sns_client = boto3.client('sns', region_name=os.environ['AWS_REGION'])
@@ -34,7 +35,7 @@ def get_file(bucket_key, bucket_name, bucket_region):
   return obj_content_string
 
 def parse_email_obj(obj_content_string):
-  
+    
   content_type = "none"
   notification_message = "empty"
 
@@ -48,12 +49,35 @@ def parse_email_obj(obj_content_string):
     notification_message = initial_string.split(";")[0].strip()
   elif "MIME-Version: 1.0" in obj_content_string:
     content_type = "inbound message"
-    notification_message = obj_content_string.split("MIME-Version: 1.0")[1]
+    notification_message = get_email_contents(obj_content_string)
+    # notification_message = obj_content_string.split("MIME-Version: 1.0")[1]
   else:
     content_type = "uncategorized email type"
     notification_message = "See S3 file link for message details."
 
   return content_type, notification_message
+
+def get_email_contents(obj_content_string):
+
+  message = email.message_from_string(obj_content_string)
+
+  email_payload = [
+    f"To: {message['to']}",
+    f"From: {message['from']}",
+    f"Subject: {message['subject']}",
+    "Body: ",
+  ]
+
+  if message.is_multipart():
+    for part in message.walk():
+      if part.get_content_type() == 'text/plain':
+        email_payload.append(part.get_payload())
+  else:
+    email_payload.append(message.get_payload())
+  
+  string_email_payload = "\n".join(str(item) for item in email_payload)
+
+  return string_email_payload
 
 def get_notification_template(content_type, notification_message, link_to_file):
 
