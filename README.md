@@ -19,9 +19,12 @@ When I searched for how to handle inbound emails, all of the tutorials that I co
 ## How to get started:
 
 - Verify your SES email domain - [Docs](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-domain-procedure.html)
-- Set up three environment variables. I'm using CircleCI to [store my environment variables](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project) and deploy the app.
-    - `SAM_BUCKET` - The S3 bucket where the CloudFormation template that SAM generates will be stored.
-    - `EMAIL_BUCKET_NAME` - Choose a name for the S3 bucket that will be created to store email files. Make sure this is globally unique. Ex, my-bucket-name-02-06.
+- Create two S3 buckets:
+    - The first bucket will store the CloudFormation template that SAM generates.
+    - The second bucket will store the inbound email files.
+- Set up four environment variables. I'm using CircleCI to [store my environment variables](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project) and deploy the app.
+    - `SAM_BUCKET` - The name of the S3 bucket where the SAM-generated CloudFormation template is stored.
+    - `EMAIL_BUCKET_NAME` - The name of the S3 bucket where inbound email files are stored.
     - `EMAIL_DOMAIN` - The verified SES domain name that the notification emails will be sent from. I'm using the same domain to send notifications as the one this app receives inbound emails for, but you can use any verified SES domain here. Ex, mydomain.com. Your SES domain will need to be [out of sandbox mode in order to send emails](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html?icmpid=docs_ses_console).
     - `EMAIL_ADDRESS` - The personal email address that will receive notifications when a new email is sent to your SES domain. Ex, myemail@gmail.com
 - Once you've deployed this CloudFormation stack, set up an SES rule to save inbound email messages to the S3 bucket that was created - [Docs](https://aws.amazon.com/premiumsupport/knowledge-center/ses-receive-inbound-emails/)
